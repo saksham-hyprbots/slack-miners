@@ -23,6 +23,20 @@ Follow these simple steps to get started:
 3) pip3 install requirements.txt [In virtual env]
 4) Then run streamlit run app.py.
 
+## 🚀 Run with Docker
+
+1. Build the Docker image:
+   ```bash
+   docker build -t slack-miners .
+   ```
+2. Run the app:
+   ```bash
+   docker run -p 8501:8501 --env-file a.env slack-miners
+   ```
+
+- The app will be available at http://localhost:8501
+- Make sure your `a.env` file contains all required environment variables (API keys, MongoDB URI, etc.)
+
 ## **🧠 What’s Inside**
 
 * 🧬 Real-time Slack message ingestion

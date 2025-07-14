@@ -1,0 +1,15 @@
+cookie:
+  name: slackrag_dashboard_cookie
+  key: some_random_key_here
+  expiry_days: 7
+
+credentials:
+  usernames:
+    admin:
+      name: Administrator
+      email: admin@example.com
+      password: adminpass  # <- plaintext – will be auto-hashed
+    user:
+      name: User
+      email: user@example.com
+      password: userpass
