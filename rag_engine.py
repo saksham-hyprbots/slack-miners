@@ -1,23 +1,33 @@
-import openai
 import os
+import ollama
+import logging
+import re
 
-openai.api_key = os.getenv("OPENAI_API_KEY")
+logging.basicConfig(level=logging.INFO)
 
-def generate_answer(query, retrieved_messages):
-    context = "\n".join(retrieved_messages)
-    prompt = f"""You are a helpful team assistant. Based on the following Slack history, answer the question:
-
-Slack Messages:
-{context}
-
-Question:
-{query}
-
-Answer:"""
-
-    response = openai.ChatCompletion.create(
-        model="gpt-3.5-turbo",
-        messages=[{"role": "user", "content": prompt}],
-        temperature=0.2,
+def generate_answer(query, retrieved_texts):
+    context = "\n".join(retrieved_texts)
+    logging.info(f"[RAG Engine] Generating answer for query: {query}")
+    prompt = (
+        f"Given the following Slack messages:\n{context}\n"
+        f"Answer the following question concisely:\n{query}\n"
+        "Respond ONLY with the answer after 'Answer:'.\nAnswer:"
     )
-    return response.choices[0].message.content.strip()
+    response = ollama.chat(model='deepseek-r1', messages=[{'role': 'user', 'content': prompt}])
+    content = response['message']['content']
+    logging.info(f"[RAG Engine] Raw model response: {content}")
+
+    # Extract everything after the last </think> tag
+    if "</think>" in content:
+        answer = content.split("</think>")[-1].strip()
+    else:
+        # Try to extract the last answer after 'Answer:'
+        matches = re.findall(r"answer[:\s\*]*([\s\S]+)", content, re.IGNORECASE)
+        if matches:
+            answer = matches[-1].strip().split('\n')[0].strip()
+        else:
+            # fallback: take the last non-empty line
+            lines = [line.strip() for line in content.strip().split('\n') if line.strip()]
+            answer = lines[-1] if lines else ""
+    logging.info(f"[RAG Engine] Final answer: {answer}")
+    return answer
