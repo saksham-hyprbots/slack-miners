@@ -1,8 +1,12 @@
-import openai
-import os
+from sentence_transformers import SentenceTransformer
+import logging
 
-openai.api_key = os.getenv("OPENAI_API_KEY")
+logging.basicConfig(level=logging.INFO)
 
-def generate_embedding(text, model="text-embedding-3-small"):
-    response = openai.Embedding.create(input=[text], model=model)
-    return response['data'][0]['embedding']
+model = SentenceTransformer('all-MiniLM-L6-v2')
+
+def generate_embedding(text):
+    logging.info(f"[Embeddings] Generating embedding for: {text}")
+    embedding = model.encode([text])[0]
+    logging.info(f"[Embeddings] Embedding shape: {embedding.shape}")
+    return embedding.tolist()

@@ -1,5 +1,7 @@
 import os
 from pymongo import MongoClient
+from dotenv import load_dotenv
+load_dotenv('a.env')
 
 MONGO_URI = os.getenv("MONGO_URI", "mongodb://localhost:27017")
 client = MongoClient(MONGO_URI)
@@ -17,3 +19,6 @@ def store_embedding(message, embedding, label=None, user=None, ts=None):
 
 def get_all_embeddings():
     return list(collection.find({}, {"_id": 0, "message": 1, "embedding": 1, "label": 1, "user": 1, "timestamp": 1}))
+
+def message_exists(ts):
+    return collection.count_documents({"timestamp": ts}) > 0
