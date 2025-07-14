@@ -22,3 +22,6 @@ def get_all_embeddings():
 
 def message_exists(ts):
     return collection.count_documents({"timestamp": ts}) > 0
+
+def update_label(message, new_label):
+    collection.update_one({"message": message}, {"$set": {"label": new_label}})

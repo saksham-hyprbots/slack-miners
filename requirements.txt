@@ -51,3 +51,7 @@ urllib3==2.5.0
 ollama
 sentence-transformers
 torch
+rapidfuzz
+streamlit-aggrid
+streamlit-authenticator
+PyYAML
