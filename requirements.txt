@@ -55,4 +55,3 @@ rapidfuzz
 streamlit-aggrid
 streamlit-authenticator
 PyYAML
-google-generativeai
