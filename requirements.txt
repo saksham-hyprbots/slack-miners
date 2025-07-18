@@ -52,6 +52,7 @@ ollama
 sentence-transformers
 torch
 rapidfuzz
+# json is part of the Python standard library
 streamlit-aggrid
 streamlit-authenticator
 PyYAML
