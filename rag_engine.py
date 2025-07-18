@@ -1,7 +1,17 @@
 import os
-import ollama
 import logging
 import re
+import google.generativeai as genai
+from dotenv import load_dotenv
+
+load_dotenv('a.env')
+
+genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
+
+def gemini_chat(prompt):
+    model = genai.GenerativeModel('gemini-2.5-flash')
+    response = model.generate_content(prompt)
+    return response.text
 
 logging.basicConfig(level=logging.INFO)
 
@@ -13,8 +23,7 @@ def generate_answer(query, retrieved_texts):
         f"Answer the following question concisely:\n{query}\n"
         "Respond ONLY with the answer after 'Answer:'.\nAnswer:"
     )
-    response = ollama.chat(model='deepseek-r1', messages=[{'role': 'user', 'content': prompt}])
-    content = response['message']['content']
+    content = gemini_chat(prompt)
     logging.info(f"[RAG Engine] Raw model response: {content}")
 
     # Extract everything after the last </think> tag

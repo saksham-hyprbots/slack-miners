@@ -1,9 +1,18 @@
 import os
 from dotenv import load_dotenv
 load_dotenv('a.env')
-import ollama
 import logging
 import re
+from google.generativeai import GenerativeModel
+import google.generativeai as genai
+
+load_dotenv('a.env')
+genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
+
+def gemini_chat(prompt):
+    model = GenerativeModel("models/gemini-1.5-pro")  # or whichever model is listed as supported
+    response = model.generate_content(prompt)
+    return response.text
 
 logging.basicConfig(level=logging.INFO)
 
@@ -14,8 +23,7 @@ def classify_message(text):
         f"Message: {text}\n"
         "Respond ONLY with the label word (task, bug, blocker, or other) and nothing else. Label:"
     )
-    response = ollama.chat(model='deepseek-r1', messages=[{'role': 'user', 'content': prompt}])
-    content = response['message']['content']
+    content = gemini_chat(prompt)
     logging.info(f"[Classifier] Raw model response: {content}")
 
     # Try to extract the last label from the response
