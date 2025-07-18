@@ -134,3 +134,4 @@ Thumbs.db
 
 # Ollama model cache
 ollama/
+a.env
