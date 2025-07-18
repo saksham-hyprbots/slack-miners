@@ -61,7 +61,8 @@ def fetch_latest_messages(limit=100):
                     user_name = user_map.get(user_id, 'unknown')
                     label = classify_message(text)
                     embedding = generate_embedding(text)
-                    store_embedding(text, embedding, label=label, user=user_name, ts=ts)
+                    thread_ts = msg.get('thread_ts', ts)  # Use ts if thread_ts not present
+                    store_embedding(text, embedding, label=label, user=user_name, ts=ts, thread_ts=thread_ts, channel_id=channel_id)
                     new_count += 1
         except SlackApiError as e:
             if e.response['error'] == 'ratelimited':
