@@ -115,6 +115,39 @@ if tab == "Expert Directory":
             f"Expertise: {', '.join([f'`{tag}`' for tag in expert['expertise']])}"
         )
 
+    # --- Expert Search Feature ---
+    st.subheader("Find Experts for Multiple Tags")
+    search_tags = st.text_input("Enter tags/topics (comma-separated, e.g., 'login, oauth, bug')", key="expert_search_multi")
+    if search_tags:
+        tag_list = [tag.strip().lower() for tag in search_tags.split(",") if tag.strip()]
+        matches = []
+        for expert in st.session_state['experts']:
+            match_count = 0
+            match_scores = []
+            for search_tag in tag_list:
+                for expert_tag in expert['expertise']:
+                    score = fuzz.partial_ratio(expert_tag.lower(), search_tag)
+                    if score > 60:
+                        match_count += 1
+                        match_scores.append(score)
+                        break  # Only count each search tag once per expert
+            if match_count > 0:
+                avg_score = sum(match_scores) / len(match_scores) if match_scores else 0
+                matches.append((match_count, avg_score, expert))
+        if matches:
+            # Sort by number of matches, then by average score
+            matches.sort(reverse=True, key=lambda x: (x[0], x[1]))
+            st.success("Matching experts:")
+            for match_count, avg_score, expert in matches:
+                st.markdown(
+                    f"**{expert['name']}** (Slack: `{expert['slack_id']}`)  \n"
+                    f"Expertise: {', '.join([f'`{tag}`' for tag in expert['expertise']])}  \n"
+                    f"Matched tags: {match_count}  \n"
+                    f"Average match score: {avg_score:.1f}"
+                )
+        else:
+            st.info("No matching expert found. Try adding more experts or tags.")
+
 # --- AI Chat Integration: Suggest Expert for Bug ---
 def find_expert_for_bug(bug_description):
     best_score = 0
@@ -299,7 +332,7 @@ def render_dashboard(filtered_df, show_summary=True):
     # (Deleted code for label correction and feedback UI)
 
 # Semantic search bar and results
-if tab != "AI Chat":
+if tab not in ["AI Chat", "Expert Directory"]:
     st.title(f"📋 {tab}")
     data = get_all_embeddings()
     df = pd.DataFrame(data)
