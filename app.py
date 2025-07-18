@@ -68,9 +68,23 @@ tab = st.sidebar.radio(
         "Important",
         "All",
         "AI Chat",
-        "Expert Directory"  # New option
+        "Expert Directory",  # New option
+        "Decision Logs"  # Decision Logs tab
     ]
 )
+
+# --- Summarization and Action Item Extraction Helpers (moved up for Decision Logs) ---
+def summarize_selected_messages(selected_msgs):
+    if not selected_msgs:
+        return "No messages selected."
+    prompt = "Summarize the following Slack messages in a concise way:\n" + "\n".join(selected_msgs)
+    return generate_answer(prompt, selected_msgs)
+
+def extract_action_items(selected_msgs):
+    if not selected_msgs:
+        return "No messages selected."
+    prompt = "Extract all action items from the following Slack messages. Respond with a bullet list of action items only.\n" + "\n".join(selected_msgs)
+    return generate_answer(prompt, selected_msgs)
 
 # --- Expert Directory Data Store with Persistence ---
 def load_experts():
@@ -192,6 +206,72 @@ if tab == "AI Chat":
             st.markdown(f"**AI:** {msg['content']}")
     st.info("Use the button above to fetch Slack messages.")
 
+# --- Decision Logs Page ---
+if tab == "Decision Logs":
+    st.title("Decision Logs")
+    data = get_all_embeddings()
+    df = pd.DataFrame(data)
+    if df.empty or 'label' not in df.columns:
+        st.warning("No Slack messages found or data is not yet indexed. Please load messages from Slack.")
+        st.stop()
+    # Ensure timestamp is float for comparison
+    df['timestamp'] = df['timestamp'].astype(float)
+    # Only consider important messages
+    important_df = df[df['label'].isin(['task', 'bug', 'blocker'])]
+
+    # Button to generate and store summaries
+    if st.button('Generate and Store Summaries for All Important Messages'):
+        from mongo_store import update_summary
+        import time
+        for idx, row in important_df.iterrows():
+            # Skip if summary already exists
+            if row.get('summary', None):
+                continue
+            msg_time = float(row['timestamp'])
+            user = row['user']
+            thread_ts = row.get('thread_ts', None)
+            # Find follow-ups: Prefer thread-based, else fallback to time/user-based
+            if thread_ts and thread_ts in df['thread_ts'].values:
+                followups = df[(df['thread_ts'] == thread_ts) & (df['message'] != row['message'])]
+            else:
+                followups = df[(df['user'] == user) & (df['timestamp'] > msg_time) & (df['timestamp'] <= msg_time + 86400) & (df['message'] != row['message'])]
+            followup_msgs = followups['message'].tolist()
+            if followup_msgs:
+                summary = summarize_selected_messages(followup_msgs)
+                update_summary(row['message'], summary)
+                time.sleep(10)  # Add delay to avoid rate limits
+        st.success('Summaries generated and stored for all important messages without a summary.')
+        st.rerun()
+    logs = []
+    for idx, row in important_df.iterrows():
+        msg_time = float(row['timestamp'])
+        user = row['user']
+        thread_ts = row.get('thread_ts', None)
+        # Find follow-ups: Prefer thread-based, else fallback to time/user-based
+        if thread_ts and thread_ts in df['thread_ts'].values:
+            followups = df[(df['thread_ts'] == thread_ts) & (df['message'] != row['message'])]
+        else:
+            followups = df[(df['user'] == user) & (df['timestamp'] > msg_time) & (df['timestamp'] <= msg_time + 86400) & (df['message'] != row['message'])]
+        followup_msgs = followups['message'].tolist()
+        # Show only stored summary if present
+        summary = row.get('summary', None)
+        if not summary:
+            summary = "No summary stored. Please generate summaries."
+        logs.append({
+            'original': row['message'],
+            'followups': followup_msgs,
+            'summary': summary,
+            'user': user,
+            'timestamp': datetime.datetime.fromtimestamp(msg_time).strftime('%Y-%m-%d %H:%M:%S')
+        })
+    # Display logs
+    for log in logs:
+        st.markdown(f"**User:** {log['user']}  ")
+        st.markdown(f"**Time:** {log['timestamp']}  ")
+        st.markdown(f"**Original Message:** {log['original']}")
+        st.markdown(f"**Summary of Follow-ups:** {log['summary']}")
+        st.markdown("---")
+
 # --- Theme toggle ---
 theme_choice = st.sidebar.selectbox('Theme', ['light', 'dark'], index=0)
 
@@ -234,17 +314,6 @@ def fuzzy_filter(df, col, query):
     matched_values = set([choices[i] for i, score, _ in matches if score > 60])
     return df[df[col].astype(str).isin(matched_values)]
 
-def summarize_selected_messages(selected_msgs):
-    if not selected_msgs:
-        return "No messages selected."
-    prompt = "Summarize the following Slack messages in a concise way:\n" + "\n".join(selected_msgs)
-    return generate_answer(prompt, selected_msgs)
-
-def extract_action_items(selected_msgs):
-    if not selected_msgs:
-        return "No messages selected."
-    prompt = "Extract all action items from the following Slack messages. Respond with a bullet list of action items only.\n" + "\n".join(selected_msgs)
-    return generate_answer(prompt, selected_msgs)
 
 def background_fetcher():
     while True:
@@ -271,7 +340,22 @@ def render_dashboard(filtered_df, show_summary=True):
     )
     filtered_df['tagged_users'] = filtered_df['message'].apply(extract_tagged_users)
     filtered_df['channel'] = filtered_df['message'].apply(extract_channel_id)
-    all_cols = ['message', 'label', 'user', 'timestamp', 'tagged_users', 'channel']
+
+    # --- Add Slack Link column ---
+    TEAM_ID = os.getenv('SLACK_TEAM_ID', 'T096DH6RKHN')  # Set your real team ID in .env
+    def slack_link(row):
+        channel_id = row.get('channel_id')
+        ts = row.get('timestamp')
+        if not channel_id or not ts:
+            return ''
+        # Convert formatted timestamp back to Slack ts format (remove non-digits)
+        ts_raw = str(row['timestamp'])
+        ts_slack = ts_raw.replace('.', '')
+        url = f"https://app.slack.com/client/{TEAM_ID}/{channel_id}/thread/{channel_id}-{ts_slack}"
+        return f'<a href="{url}" target="_blank">View in Slack</a>'
+    filtered_df['Slack Link'] = filtered_df.apply(slack_link, axis=1)
+
+    all_cols = ['message', 'label', 'user', 'timestamp', 'tagged_users', 'channel', 'Slack Link']
     # --- Customizable columns ---
     if 'display_cols' not in st.session_state:
         st.session_state['display_cols'] = all_cols.copy()
@@ -312,7 +396,8 @@ def render_dashboard(filtered_df, show_summary=True):
     gb.configure_pagination()
     gb.configure_default_column(editable=True, groupable=True)
     gb.configure_selection('multiple', use_checkbox=True)
-    grid_response = AgGrid(filtered_df[display_cols], gridOptions=gb.build(), enable_enterprise_modules=False, return_mode='AS_INPUT')
+    # Render Slack Link column as HTML
+    grid_response = AgGrid(filtered_df[display_cols], gridOptions=gb.build(), enable_enterprise_modules=False, return_mode='AS_INPUT', allow_unsafe_jscode=True, height=400, fit_columns_on_grid_load=True, reload_data=True, custom_css={".ag-cell": {"overflow": "visible"}}, enable_html=True)
     selected_rows = grid_response.get('selected_rows')
     if selected_rows is None:
         selected_rows = []
@@ -343,7 +428,7 @@ def render_dashboard(filtered_df, show_summary=True):
     # (Deleted code for label correction and feedback UI)
 
 # Semantic search bar and results
-if tab not in ["AI Chat", "Expert Directory"]:
+if tab not in ["AI Chat", "Expert Directory", "Decision Logs"]:
     st.title(f"📋 {tab}")
     data = get_all_embeddings()
     df = pd.DataFrame(data)
