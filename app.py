@@ -3,7 +3,7 @@ import pandas as pd
 from vector_index import VectorIndex
 from slack_ingest import fetch_latest_messages
 from rag_engine import generate_answer
-from mongo_store import get_all_embeddings, store_embedding, update_label
+from mongo_store import get_all_embeddings, store_embedding, update_label, delete_message
 import datetime
 import threading
 import time
@@ -17,6 +17,7 @@ import os
 import streamlit_authenticator as stauth
 import yaml
 from yaml.loader import SafeLoader
+import json
 
 load_dotenv('a.env')
 
@@ -66,9 +67,97 @@ tab = st.sidebar.radio(
         "Blockers",
         "Important",
         "All",
-        "AI Chat"
+        "AI Chat",
+        "Expert Directory"  # New option
     ]
 )
+
+# --- Expert Directory Data Store with Persistence ---
+def load_experts():
+    try:
+        with open("experts.json", "r") as f:
+            st.session_state['experts'] = json.load(f)
+    except FileNotFoundError:
+        st.session_state['experts'] = []
+
+def save_experts():
+    with open("experts.json", "w") as f:
+        json.dump(st.session_state['experts'], f)
+
+if 'experts' not in st.session_state:
+    load_experts()
+
+# Update add_expert to save after adding
+def add_expert(name, expertise, slack_id):
+    st.session_state['experts'].append({
+        "name": name,
+        "expertise": [tag.strip() for tag in expertise.split(",")],
+        "slack_id": slack_id
+    })
+    save_experts()
+
+# --- Expert Directory Page ---
+if tab == "Expert Directory":
+    st.title("Expert Directory")
+    with st.form("add_expert_form"):
+        name = st.text_input("Expert Name")
+        expertise = st.text_input("Expertise (comma-separated tags)")
+        slack_id = st.text_input("Slack ID (e.g., U12345678)")
+        submitted = st.form_submit_button("Add Expert")
+        if submitted and name and expertise and slack_id:
+            add_expert(name, expertise, slack_id)
+            st.success(f"Added expert: {name}")
+
+    st.subheader("Current Experts")
+    for expert in st.session_state['experts']:
+        st.markdown(
+            f"**{expert['name']}** (Slack: `{expert['slack_id']}`)  \n"
+            f"Expertise: {', '.join([f'`{tag}`' for tag in expert['expertise']])}"
+        )
+
+# --- AI Chat Integration: Suggest Expert for Bug ---
+def find_expert_for_bug(bug_description):
+    best_score = 0
+    best_expert = None
+    for expert in st.session_state['experts']:
+        for tag in expert['expertise']:
+            score = fuzz.partial_ratio(tag.lower(), bug_description.lower())
+            if score > best_score:
+                best_score = score
+                best_expert = expert
+    if best_score > 60:
+        return best_expert
+    return None
+
+if tab == "AI Chat":
+    st.title("AI Chat with Slack Knowledge")
+    if st.button("🔄 Load Messages from Slack"):
+        fetch_latest_messages()
+        st.success("Messages indexed from Slack!")
+    # Multi-turn chat: maintain chat history in session state
+    if 'chat_history' not in st.session_state:
+        st.session_state['chat_history'] = []
+    user_input = st.text_input("🔍 Ask a question from team history:")
+    if st.button("Send") and user_input:
+        st.session_state['chat_history'].append({"role": "user", "content": user_input})
+        # Build context from chat history
+        context = "\n".join([f"{msg['role']}: {msg['content']}" for msg in st.session_state['chat_history']])
+        index = VectorIndex()
+        index.build_index()
+        results = index.search(user_input, top_k=5)
+        retrieved_texts = [msg for msg, _ in results]
+        # Pass chat history and retrieved texts to the model
+        prompt = f"Context from Slack:\n{chr(10).join(retrieved_texts)}\n\nChat history:\n{context}\n\nAnswer the last user question based on the above."
+        with st.spinner("🧠 Generating answer..."):
+            answer = generate_answer(prompt, retrieved_texts)
+        st.session_state['chat_history'].append({"role": "assistant", "content": answer})
+    # Display chat history
+    for msg in st.session_state['chat_history']:
+        if msg['role'] == 'user':
+            st.markdown(f"**You:** {msg['content']}")
+        else:
+            st.markdown(f"**AI:** {msg['content']}")
+    st.info("Use the button above to fetch Slack messages.")
 
 # --- Theme toggle ---
 theme_choice = st.sidebar.selectbox('Theme', ['light', 'dark'], index=0)
@@ -179,7 +268,7 @@ def render_dashboard(filtered_df, show_summary=True):
         user_filter = preset['user_filter']
         msg_filter = preset['msg_filter']
         selected_cols = preset['columns']
-        st.experimental_rerun()
+        st.rerun()
     display_cols = selected_cols
     if show_summary:
         st.markdown("### 🧮 Summary")
@@ -206,15 +295,8 @@ def render_dashboard(filtered_df, show_summary=True):
         actions = extract_action_items(selected_msgs)
         st.markdown('#### Action Items:')
         st.write(actions)
-    # Feedback loop: allow user to correct label
-    st.markdown('#### Feedback: Correct a label')
-    for idx, row in filtered_df.iterrows():
-        new_label = st.selectbox(f"Label for message: {row['message'][:40]}...", ["task", "bug", "blocker", "other"], index=["task", "bug", "blocker", "other"].index(row['label']), key=f"label_{idx}")
-        if new_label != row['label']:
-            if st.button(f"Update label for message {idx}", key=f"update_{idx}"):
-                update_label(row['message'], new_label)
-                st.success(f"Label updated to {new_label} for message: {row['message'][:40]}...")
-                st.experimental_rerun()
+    # Remove feedback loop: allow user to correct label
+    # (Deleted code for label correction and feedback UI)
 
 # Semantic search bar and results
 if tab != "AI Chat":
@@ -250,32 +332,3 @@ if tab != "AI Chat":
     else:  # All
         filtered_df = df
         render_dashboard(filtered_df, show_summary=True)
-else:
-    st.title("💬 AI Chat with Slack Knowledge")
-    if st.button("🔄 Load Messages from Slack"):
-        fetch_latest_messages()
-        st.success("Messages indexed from Slack!")
-    # Multi-turn chat: maintain chat history in session state
-    if 'chat_history' not in st.session_state:
-        st.session_state['chat_history'] = []
-    user_input = st.text_input("🔍 Ask a question from team history:")
-    if st.button("Send") and user_input:
-        st.session_state['chat_history'].append({"role": "user", "content": user_input})
-        # Build context from chat history
-        context = "\n".join([f"{msg['role']}: {msg['content']}" for msg in st.session_state['chat_history']])
-        index = VectorIndex()
-        index.build_index()
-        results = index.search(user_input, top_k=5)
-        retrieved_texts = [msg for msg, _ in results]
-        # Pass chat history and retrieved texts to the model
-        prompt = f"Context from Slack:\n{chr(10).join(retrieved_texts)}\n\nChat history:\n{context}\n\nAnswer the last user question based on the above."
-        with st.spinner("🧠 Generating answer..."):
-            answer = generate_answer(prompt, retrieved_texts)
-        st.session_state['chat_history'].append({"role": "assistant", "content": answer})
-    # Display chat history
-    for msg in st.session_state['chat_history']:
-        if msg['role'] == 'user':
-            st.markdown(f"**You:** {msg['content']}")
-        else:
-            st.markdown(f"**AI:** {msg['content']}")
-    st.info("Use the button above to fetch Slack messages.")
