@@ -25,9 +25,3 @@ def message_exists(ts):
 
 def update_label(message, new_label):
     collection.update_one({"message": message}, {"$set": {"label": new_label}})
-
-def delete_message(message=None, ts=None):
-    if message is not None:
-        collection.delete_one({"message": message})
-    elif ts is not None:
-        collection.delete_one({"timestamp": ts})
