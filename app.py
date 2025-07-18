@@ -320,6 +320,17 @@ def render_dashboard(filtered_df, show_summary=True):
         row['message'] if isinstance(row, dict) and 'message' in row else str(row)
         for row in selected_rows
     ]
+    # Multi-delete feature with confirmation
+    if selected_rows is not None and len(selected_rows) > 0:
+        st.warning(f"You have selected {len(selected_rows)} messages for deletion.")
+        confirm = st.checkbox("I confirm I want to delete the selected messages.", key="confirm_delete_selected")
+        if confirm:
+            if st.button("Delete Selected Messages"):
+                for row in selected_rows:
+                    if isinstance(row, dict) and 'message' in row:
+                        delete_message(message=row['message'])
+                st.success(f"Deleted {len(selected_rows)} messages.")
+                st.rerun()
     if st.button('Summarize Selected Messages'):
         summary = summarize_selected_messages(selected_msgs)
         st.markdown('#### Summary:')
