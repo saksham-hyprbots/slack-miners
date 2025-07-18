@@ -18,6 +18,7 @@ import streamlit_authenticator as stauth
 import yaml
 from yaml.loader import SafeLoader
 import json
+from streamlit_option_menu import option_menu
 
 load_dotenv('a.env')
 
@@ -27,8 +28,8 @@ logging.basicConfig(level=logging.INFO)
 # name, authentication_status, username = authenticate_user()
 # st.write(name, authentication_status, username)
 
-st.title("Slack RAG Assistant (No Authentication)")
-st.write("Authentication has been removed. The app is now open to all users.")
+# st.title("Slack RAG Assistant (No Authentication)")
+# st.write("Authentication has been removed. The app is now open to all users.")
 
 
 # --- Custom CSS for better button design ---
@@ -36,7 +37,7 @@ st.markdown(
     """
     <style>
     .stButton>button {
-        background-color: #4F8BF9;
+        background-color: #5C5470;
         color: white;
         font-size: 18px;
         border-radius: 8px;
@@ -46,7 +47,7 @@ st.markdown(
         transition: background 0.2s;
     }
     .stButton>button:hover {
-        background-color: #1746A2;
+        background-color: #352F44;
         color: #fff;
     }
     </style>
@@ -57,23 +58,108 @@ st.markdown(
 
 st.set_page_config(page_title="Slack RAG Assistant", layout="wide", initial_sidebar_state="auto")
 
-# Sidebar navigation
-st.sidebar.title("Navigation")
-tab = st.sidebar.radio(
-    "Go to",
-    [
-        "Prioritized Tasks",
-        "Bugs",
-        "Blockers",
-        "Important",
-        "All",
-        "AI Chat",
-        "Expert Directory",  # New option
-        "Decision Logs"  # Decision Logs tab
-    ]
+st.markdown(
+    """
+    <style>
+        [data-testid="stSidebarCollapseButton"] {
+        display: none !important;
+        visibility: hidden !important;
+        pointer-events: none !important;
+        width: 0 !important;
+        height: 0 !important;
+        opacity: 0 !important;
+        position: absolute !important;
+        z-index: -1 !important;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
 )
 
-# --- Summarization and Action Item Extraction Helpers (moved up for Decision Logs) ---
+st.markdown(
+    """
+    <style>
+    [data-testid="stSidebar"] {
+        min-width: 300px;
+        max-width: 300px;
+        width: 300px;
+        background-color: #2A2438;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
+
+st.markdown(
+    """
+    <style>
+    .iconify {
+        color: #fff !important;
+    }
+    .nav-link[aria-current="page"] .iconify {
+        color: #2A2438 !important;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
+
+st.markdown(
+    """
+    <style>
+    .stMultiSelect [data-baseweb="tag"] {
+        background-color: #5C5470;
+        color: #fff;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
+
+# --- Modern Sidebar Navigation ---
+with st.sidebar:
+    col1, col2 = st.columns([1, 3])  # Adjust the ratio as needed
+    with col1:
+        st.image("logo.png", width=48)
+    with col2:
+        st.markdown(
+            """
+                <div style='font-size:2rem; font-weight:700; letter-spacing:1px; margin-bottom:2rem;'>HyperSlack</div>
+            """,
+            unsafe_allow_html=True
+        )
+    selected_tab = option_menu(
+        menu_title=None,
+        options=[
+            "Prioritized Tasks",
+            "Bugs",
+            "Blockers",
+            "Important",
+            "All",
+            "AI Chat",
+            "Expert Directory",
+            "Decision logs"
+        ],
+        icons=[
+            "star-fill",  # Prioritized Tasks
+            "bug-fill",   # Bugs
+            "exclamation-triangle-fill",  # Blockers
+            "bookmark-fill",  # Important
+            "list-task",  # All
+            "chat-dots-fill",  # AI Chat
+            "person-lines-fill"  # Expert Directory
+        ],
+        menu_icon="cast",
+        default_index=0,
+        orientation="vertical",
+        styles={
+            "container": {"padding": "0!important", "background-color": "#2A2438"},
+            "iconify": {"color": "#fff", "font-size": "1.2rem"},
+            "nav-link": {"font-size": "1.1rem", "text-align": "left", "margin":"0.2rem 0", "padding": "0.7rem 1rem"},
+            "nav-link-selected": {"background-color": "#DBD8E3", "color": "#2A2438", "font-weight": "bold"},
+        }
+    )
+
 def summarize_selected_messages(selected_msgs):
     if not selected_msgs:
         return "No messages selected."
@@ -111,7 +197,7 @@ def add_expert(name, expertise, slack_id):
     save_experts()
 
 # --- Expert Directory Page ---
-if tab == "Expert Directory":
+if selected_tab == "Expert Directory":
     st.title("Expert Directory")
     with st.form("add_expert_form"):
         name = st.text_input("Expert Name")
@@ -176,7 +262,7 @@ def find_expert_for_bug(bug_description):
         return best_expert
     return None
 
-if tab == "AI Chat":
+if selected_tab == "AI Chat":
     st.title("AI Chat with Slack Knowledge")
     if st.button("🔄 Load Messages from Slack"):
         fetch_latest_messages()
@@ -207,7 +293,7 @@ if tab == "AI Chat":
     st.info("Use the button above to fetch Slack messages.")
 
 # --- Decision Logs Page ---
-if tab == "Decision Logs":
+if selected_tab == "Decision Logs":
     st.title("Decision Logs")
     data = get_all_embeddings()
     df = pd.DataFrame(data)
@@ -273,7 +359,7 @@ if tab == "Decision Logs":
         st.markdown("---")
 
 # --- Theme toggle ---
-theme_choice = st.sidebar.selectbox('Theme', ['light', 'dark'], index=0)
+# theme_choice = st.sidebar.selectbox('Theme', ['light', 'dark'], index=0)
 
 # Helper to get Slack user and channel maps
 SLACK_TOKEN = os.getenv("SLACK_BOT_TOKEN")
@@ -428,8 +514,8 @@ def render_dashboard(filtered_df, show_summary=True):
     # (Deleted code for label correction and feedback UI)
 
 # Semantic search bar and results
-if tab not in ["AI Chat", "Expert Directory", "Decision Logs"]:
-    st.title(f"📋 {tab}")
+if selected_tab not in ["AI Chat", "Expert Directory", "Decision Logs"]:
+    st.title(f"📋 {selected_tab}")
     data = get_all_embeddings()
     df = pd.DataFrame(data)
     if df.empty or 'label' not in df.columns:
@@ -446,16 +532,16 @@ if tab not in ["AI Chat", "Expert Directory", "Decision Logs"]:
         ])
         st.markdown("#### Top 10 Semantic Matches:")
         st.dataframe(semantic_results)
-    if tab == "Prioritized Tasks":
+    if selected_tab == "Prioritized Tasks":
         filtered_df = df[df['label'] == 'task']
         render_dashboard(filtered_df, show_summary=False)
-    elif tab == "Bugs":
+    elif selected_tab == "Bugs":
         filtered_df = df[df['label'] == 'bug']
         render_dashboard(filtered_df, show_summary=False)
-    elif tab == "Blockers":
+    elif selected_tab == "Blockers":
         filtered_df = df[df['label'] == 'blocker']
         render_dashboard(filtered_df, show_summary=False)
-    elif tab == "Important":
+    elif selected_tab == "Important":
         filtered_df = df[df['label'].isin(['task', 'bug', 'blocker'])]
         render_dashboard(filtered_df, show_summary=False)
     else:  # All
