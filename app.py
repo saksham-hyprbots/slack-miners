@@ -50,6 +50,282 @@ st.markdown(
         background-color: #352F44;
         color: #fff;
     }
+    
+    /* Modern Search Bar Styling */
+    .stTextInput > div > div > input {
+        background-color: #2A2438;
+        color: #fff;
+        border: 2px solid #5C5470;
+        border-radius: 10px;
+        padding: 12px 16px;
+        font-size: 16px;
+        transition: all 0.3s ease;
+    }
+    .stTextInput > div > div > input:focus {
+        border-color: #DBD8E3;
+        box-shadow: 0 0 0 2px rgba(219, 216, 227, 0.2);
+        outline: none;
+    }
+    .stTextInput > div > div > input::placeholder {
+        color: #9CA3AF;
+    }
+    
+    /* Modern Card Styling for Decision Logs */
+    .decision-log-card {
+        background: linear-gradient(135deg, #2A2438 0%, #352F44 100%);
+        border: 1px solid #5C5470;
+        border-radius: 12px;
+        padding: 20px;
+        margin: 16px 0;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .decision-log-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+    }
+    
+    /* Modern Section Headers */
+    .modern-header {
+        background: linear-gradient(135deg, #5C5470 0%, #352F44 100%);
+        color: #fff;
+        padding: 16px 24px;
+        border-radius: 10px;
+        margin: 20px 0;
+        font-weight: 600;
+        font-size: 1.2rem;
+        border-left: 4px solid #DBD8E3;
+    }
+    
+    /* Modern Success/Info Messages */
+    .stSuccess {
+        background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+        color: #fff;
+        border-radius: 10px;
+        padding: 12px 16px;
+        border: none;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    
+    .stInfo {
+        background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
+        color: #fff;
+        border-radius: 10px;
+        padding: 12px 16px;
+        border: none;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    
+    /* Modern Warning Messages */
+    .stWarning {
+        background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
+        color: #fff;
+        border-radius: 10px;
+        padding: 12px 16px;
+        border: none;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    
+    /* Modern Divider */
+    .modern-divider {
+        height: 2px;
+        background: linear-gradient(90deg, transparent 0%, #5C5470 50%, transparent 100%);
+        margin: 20px 0;
+        border-radius: 1px;
+    }
+    
+    /* Modern Text Styling */
+    .modern-text {
+        color: #DBD8E3;
+        line-height: 1.6;
+    }
+    
+    .modern-label {
+        color: #5C5470;
+        font-weight: 600;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .modern-value {
+        color: #DBD8E3;
+        font-weight: 500;
+        margin-bottom: 8px;
+    }
+    
+    /* AgGrid Modern Dark Theme - Matching Sidebar */
+    .ag-theme-alpine {
+        background: linear-gradient(135deg, #2A2438 0%, #352F44 100%) !important;
+        border: 2px solid #5C5470 !important;
+        border-radius: 12px !important;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3) !important;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+        overflow: hidden !important;
+    }
+    
+    /* Force all AgGrid elements to use our theme */
+    div[class*="ag-theme-alpine"],
+    .ag-theme-alpine,
+    .ag-theme-alpine * {
+        background: linear-gradient(135deg, #2A2438 0%, #352F44 100%) !important;
+        color: #DBD8E3 !important;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+    }
+    
+    .ag-theme-alpine .ag-header {
+        background: linear-gradient(135deg, #5C5470 0%, #352F44 100%) !important;
+        border-bottom: 2px solid #DBD8E3 !important;
+        color: #fff !important;
+        font-weight: 600 !important;
+        font-size: 14px !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.5px !important;
+        min-height: 60px !important;
+    }
+    
+    .ag-theme-alpine .ag-header-cell {
+        background: linear-gradient(135deg, #5C5470 0%, #352F44 100%) !important;
+        color: #fff !important;
+        border-right: 1px solid rgba(219, 216, 227, 0.2) !important;
+        padding: 16px 20px !important;
+        font-weight: 600 !important;
+        font-size: 13px !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.5px !important;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+    }
+    
+    .ag-theme-alpine .ag-header-cell:hover {
+        background: linear-gradient(135deg, #352F44 0%, #2A2438 100%) !important;
+        transform: translateY(-1px) !important;
+        transition: all 0.2s ease !important;
+    }
+    
+    .ag-theme-alpine .ag-row {
+        background: linear-gradient(135deg, #2A2438 0%, #352F44 100%) !important;
+        border-bottom: 1px solid rgba(92, 84, 112, 0.3) !important;
+        transition: all 0.2s ease !important;
+        min-height: 50px !important;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+        font-size: 14px !important;
+        line-height: 1.6 !important;
+    }
+    
+    .ag-theme-alpine .ag-row:hover {
+        background: linear-gradient(135deg, #352F44 0%, #2A2438 100%) !important;
+        transform: translateY(-1px) !important;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
+    }
+    
+    .ag-theme-alpine .ag-row.ag-row-selected {
+        background: linear-gradient(135deg, #5C5470 0%, #352F44 100%) !important;
+        border-left: 4px solid #DBD8E3 !important;
+        box-shadow: 0 4px 16px rgba(92, 84, 112, 0.4) !important;
+    }
+    
+    .ag-theme-alpine .ag-cell {
+        padding: 16px 20px !important;
+        color: #DBD8E3 !important;
+        border-right: 1px solid rgba(92, 84, 112, 0.3) !important;
+        font-size: 14px !important;
+        line-height: 1.6 !important;
+        vertical-align: middle !important;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+    }
+    
+    .ag-theme-alpine .ag-cell:focus {
+        outline: none !important;
+        background: rgba(219, 216, 227, 0.1) !important;
+        border-radius: 4px !important;
+    }
+    
+    .ag-theme-alpine .ag-paging-panel {
+        background: linear-gradient(135deg, #2A2438 0%, #352F44 100%) !important;
+        border-top: 2px solid #5C5470 !important;
+        color: #DBD8E3 !important;
+        padding: 16px 20px !important;
+        font-weight: 500 !important;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+    }
+    
+    .ag-theme-alpine .ag-paging-button {
+        background: linear-gradient(135deg, #5C5470 0%, #352F44 100%) !important;
+        color: #fff !important;
+        border: none !important;
+        border-radius: 8px !important;
+        padding: 10px 16px !important;
+        margin: 0 6px !important;
+        transition: all 0.2s ease !important;
+        font-weight: 600 !important;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2) !important;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+    }
+    
+    .ag-theme-alpine .ag-paging-button:hover {
+        background: linear-gradient(135deg, #352F44 0%, #2A2438 100%) !important;
+        transform: translateY(-1px) !important;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3) !important;
+    }
+    
+    .ag-theme-alpine .ag-checkbox-input-wrapper {
+        background: #2A2438 !important;
+        border: 2px solid #5C5470 !important;
+        border-radius: 6px !important;
+        width: 18px !important;
+        height: 18px !important;
+        cursor: pointer !important;
+        position: relative !important;
+        z-index: 10 !important;
+    }
+    
+    .ag-theme-alpine .ag-checkbox-input-wrapper.ag-checked {
+        background: linear-gradient(135deg, #5C5470 0%, #352F44 100%) !important;
+        border-color: #DBD8E3 !important;
+    }
+    
+    .ag-theme-alpine .ag-checkbox-input-wrapper.ag-checked::after {
+        content: '✓' !important;
+        color: #DBD8E3 !important;
+        position: absolute !important;
+        top: 50% !important;
+        left: 50% !important;
+        transform: translate(-50%, -50%) !important;
+        font-size: 12px !important;
+        font-weight: bold !important;
+    }
+    
+    /* Make sure the selection column is visible */
+    .ag-theme-alpine .ag-cell[col-id="0"] {
+        min-width: 50px !important;
+        width: 50px !important;
+    }
+    
+    /* Force override for any conflicting styles */
+    div[class*="ag-theme-alpine"] {
+        --ag-background-color: #2A2438 !important;
+        --ag-foreground-color: #DBD8E3 !important;
+        --ag-header-background-color: #5C5470 !important;
+        --ag-header-foreground-color: #fff !important;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+    }
+    
+    /* Additional force overrides */
+    .ag-theme-alpine .ag-root-wrapper {
+        background: linear-gradient(135deg, #2A2438 0%, #352F44 100%) !important;
+    }
+    
+    .ag-theme-alpine .ag-root {
+        background: linear-gradient(135deg, #2A2438 0%, #352F44 100%) !important;
+    }
+    
+    .ag-theme-alpine .ag-body-viewport {
+        background: linear-gradient(135deg, #2A2438 0%, #352F44 100%) !important;
+    }
+    
+    .ag-theme-alpine .ag-body-viewport-wrapper {
+        background: linear-gradient(135deg, #2A2438 0%, #352F44 100%) !important;
+    }
     </style>
     """,
     unsafe_allow_html=True
@@ -306,8 +582,8 @@ if selected_tab == "Decision Logs":
     important_df = df[df['label'].isin(['task', 'bug', 'blocker'])]
 
     # --- Search Feature for Decision Logs ---
-    st.subheader("🔍 Search Decision Logs")
-    search_query = st.text_input("Search for messages in decision logs:", placeholder="Enter keywords or phrases...")
+    st.markdown('<div class="modern-header">🔍 Search Decision Logs</div>', unsafe_allow_html=True)
+    search_query = st.text_input("Search for messages in decision logs:", placeholder="Enter keywords or phrases...", key="decision_logs_search")
     
     if search_query:
         # Use semantic search to find relevant messages
@@ -321,7 +597,7 @@ if selected_tab == "Decision Logs":
         
         if not filtered_important_df.empty:
             st.success(f"Found {len(filtered_important_df)} relevant decision log entries:")
-            st.markdown("---")
+            st.markdown('<div class="modern-divider"></div>', unsafe_allow_html=True)
             
             # Display search results
             for idx, row in filtered_important_df.iterrows():
@@ -339,16 +615,23 @@ if selected_tab == "Decision Logs":
                 if not summary:
                     summary = "No summary stored. Please generate summaries."
                 
-                st.markdown(f"**User:** {user}  ")
-                st.markdown(f"**Time:** {datetime.datetime.fromtimestamp(msg_time).strftime('%Y-%m-%d %H:%M:%S')}  ")
-                st.markdown(f"**Original Message:** {row['message']}")
-                st.markdown(f"**Summary of Follow-ups:** {summary}")
-                st.markdown("---")
+                st.markdown(f"""
+                <div class="decision-log-card">
+                    <div class="modern-label">User</div>
+                    <div class="modern-value">{user}</div>
+                    <div class="modern-label">Time</div>
+                    <div class="modern-value">{datetime.datetime.fromtimestamp(msg_time).strftime('%Y-%m-%d %H:%M:%S')}</div>
+                    <div class="modern-label">Original Message</div>
+                    <div class="modern-value">{row['message']}</div>
+                    <div class="modern-label">Summary of Follow-ups</div>
+                    <div class="modern-value">{summary}</div>
+                </div>
+                """, unsafe_allow_html=True)
         else:
             st.info("No relevant decision log entries found for your search. Try different keywords.")
     else:
         # Show all decision logs when no search is performed
-        st.subheader("📋 All Decision Logs")
+        st.markdown('<div class="modern-header">📋 All Decision Logs</div>', unsafe_allow_html=True)
 
     # Button to generate and store summaries
     if st.button('Generate and Store Summaries for All Important Messages'):
@@ -400,11 +683,18 @@ if selected_tab == "Decision Logs":
             })
         # Display logs
         for log in logs:
-            st.markdown(f"**User:** {log['user']}  ")
-            st.markdown(f"**Time:** {log['timestamp']}  ")
-            st.markdown(f"**Original Message:** {log['original']}")
-            st.markdown(f"**Summary of Follow-ups:** {log['summary']}")
-            st.markdown("---")
+            st.markdown(f"""
+            <div class="decision-log-card">
+                <div class="modern-label">User</div>
+                <div class="modern-value">{log['user']}</div>
+                <div class="modern-label">Time</div>
+                <div class="modern-value">{log['timestamp']}</div>
+                <div class="modern-label">Original Message</div>
+                <div class="modern-value">{log['original']}</div>
+                <div class="modern-label">Summary of Follow-ups</div>
+                <div class="modern-value">{log['summary']}</div>
+            </div>
+            """, unsafe_allow_html=True)
 
 # --- Theme toggle ---
 # theme_choice = st.sidebar.selectbox('Theme', ['light', 'dark'], index=0)
@@ -445,7 +735,8 @@ def fuzzy_filter(df, col, query):
         return df
     choices = df[col].astype(str).tolist()
     matches = process.extract(query, choices, scorer=fuzz.partial_ratio, limit=len(choices))
-    matched_values = set([choices[i] for i, score, _ in matches if score > 60])
+    # Fix: process.extract returns (choice, score, index) tuples
+    matched_values = set([choice for choice, score, index in matches if score > 60])
     return df[df[col].astype(str).isin(matched_values)]
 
 
@@ -463,103 +754,243 @@ fetcher_thread = threading.Thread(target=background_fetcher, daemon=True)
 fetcher_thread.start()
 
 def render_dashboard(filtered_df, show_summary=True):
-    user_filter = st.text_input("Fuzzy search user (initials, partial, etc.)")
-    msg_filter = st.text_input("Fuzzy search message text")
-    if user_filter:
-        filtered_df = fuzzy_filter(filtered_df, 'user', user_filter)
-    if msg_filter:
-        filtered_df = fuzzy_filter(filtered_df, 'message', msg_filter)
-    filtered_df['timestamp'] = filtered_df['timestamp'].apply(
-        lambda x: datetime.datetime.fromtimestamp(float(x)).strftime('%Y-%m-%d %H:%M:%S') if x else ''
-    )
-    filtered_df['tagged_users'] = filtered_df['message'].apply(extract_tagged_users)
-    filtered_df['channel'] = filtered_df['message'].apply(extract_channel_id)
+    # Create a container for better organization
+    with st.container():
+        # Header section with better spacing
+        st.markdown("---")
+        
+        # Search filters in a nice layout
+        col1, col2 = st.columns(2)
+        with col1:
+            user_filter = st.text_input("🔍 Search by user", placeholder="Enter user name or initials...")
+        with col2:
+            msg_filter = st.text_input("🔍 Search by message", placeholder="Enter keywords...")
+        
+        # Apply filters
+        if user_filter:
+            filtered_df = fuzzy_filter(filtered_df, 'user', user_filter)
+        if msg_filter:
+            filtered_df = fuzzy_filter(filtered_df, 'message', msg_filter)
+        
+        # Process data
+        filtered_df['timestamp'] = filtered_df['timestamp'].apply(
+            lambda x: datetime.datetime.fromtimestamp(float(x)).strftime('%Y-%m-%d %H:%M:%S') if x else ''
+        )
+        filtered_df['tagged_users'] = filtered_df['message'].apply(extract_tagged_users)
+        filtered_df['channel'] = filtered_df['message'].apply(extract_channel_id)
 
-    # --- Add Slack Link column ---
-    TEAM_ID = os.getenv('SLACK_TEAM_ID', 'T096DH6RKHN')  # Set your real team ID in .env
-    def slack_link(row):
-        channel_id = row.get('channel_id')
-        ts = row.get('timestamp')
-        if not channel_id or not ts:
-            return ''
-        # Convert formatted timestamp back to Slack ts format (remove non-digits)
-        ts_raw = str(row['timestamp'])
-        ts_slack = ts_raw.replace('.', '')
-        url = f"https://app.slack.com/client/{TEAM_ID}/{channel_id}/thread/{channel_id}-{ts_slack}"
-        return f'<a href="{url}" target="_blank">View in Slack</a>'
-    filtered_df['Slack Link'] = filtered_df.apply(slack_link, axis=1)
+        # --- Add Slack Link column ---
+        TEAM_ID = os.getenv('SLACK_TEAM_ID', 'T096DH6RKHN')  # Set your real team ID in .env
+        def slack_link(row):
+            channel_id = row.get('channel_id')
+            ts = row.get('timestamp')
+            if not channel_id or not ts:
+                return ''
+            # Convert formatted timestamp back to Slack ts format (remove non-digits)
+            ts_raw = str(row['timestamp'])
+            ts_slack = ts_raw.replace('.', '')
+            url = f"https://app.slack.com/client/{TEAM_ID}/{channel_id}/thread/{channel_id}-{ts_slack}"
+            return f'<a href="{url}" target="_blank">View in Slack</a>'
+        filtered_df['Slack Link'] = filtered_df.apply(slack_link, axis=1)
 
-    all_cols = ['message', 'label', 'user', 'timestamp', 'tagged_users', 'channel', 'Slack Link']
-    # --- Customizable columns ---
-    if 'display_cols' not in st.session_state:
-        st.session_state['display_cols'] = all_cols.copy()
-    st.sidebar.markdown('### Dashboard Columns')
-    selected_cols = st.sidebar.multiselect(
-        'Choose columns to display:', all_cols, default=st.session_state['display_cols']
-    )
-    if st.sidebar.button('Save column preset'):
-        st.session_state['display_cols'] = selected_cols
-        st.sidebar.success('Column preset saved!')
-    if not selected_cols:
-        selected_cols = all_cols
-    # --- Filter presets ---
-    if 'filter_presets' not in st.session_state:
-        st.session_state['filter_presets'] = {}
-    preset_name = st.sidebar.text_input('Save current filters as preset (name):')
-    if st.sidebar.button('Save filter preset') and preset_name:
-        st.session_state['filter_presets'][preset_name] = {
-            'user_filter': user_filter,
-            'msg_filter': msg_filter,
-            'columns': selected_cols
+        all_cols = ['message', 'label', 'user', 'timestamp', 'tagged_users', 'channel', 'Slack Link']
+        
+        # Sidebar controls in a better layout
+        with st.sidebar:
+            st.markdown("### 📊 Dashboard Controls")
+            
+            # Column selection
+            st.markdown("**Choose columns to display:**")
+            if 'display_cols' not in st.session_state:
+                st.session_state['display_cols'] = all_cols.copy()
+            selected_cols = st.multiselect(
+                'Select columns:', all_cols, default=st.session_state['display_cols']
+            )
+            if st.button('💾 Save column preset', key='save_cols'):
+                st.session_state['display_cols'] = selected_cols
+                st.success('Column preset saved!')
+            
+            st.markdown("---")
+            
+            # Filter presets
+            st.markdown("**Filter Presets:**")
+            if 'filter_presets' not in st.session_state:
+                st.session_state['filter_presets'] = {}
+            
+            preset_name = st.text_input('Save current filters as preset:', key='preset_name')
+            col_save, col_load = st.columns(2)
+            with col_save:
+                if st.button('💾 Save preset') and preset_name:
+                    st.session_state['filter_presets'][preset_name] = {
+                        'user_filter': user_filter,
+                        'msg_filter': msg_filter,
+                        'columns': selected_cols
+                    }
+                    st.success(f'Preset "{preset_name}" saved!')
+            
+            with col_load:
+                if st.button('📂 Load preset') and st.session_state['filter_presets']:
+                    preset_to_load = st.selectbox('Choose preset:', list(st.session_state['filter_presets'].keys()))
+                    preset = st.session_state['filter_presets'][preset_to_load]
+                    user_filter = preset['user_filter']
+                    msg_filter = preset['msg_filter']
+                    selected_cols = preset['columns']
+                    st.rerun()
+        
+        if not selected_cols:
+            selected_cols = all_cols
+        display_cols = selected_cols
+        
+        # Summary section with better styling
+        if show_summary:
+            st.markdown("### 📈 Summary Statistics")
+            col1, col2, col3 = st.columns(3)
+            with col1:
+                task_count = filtered_df[filtered_df['label'] == 'task'].shape[0]
+                st.metric("Tasks", task_count)
+            with col2:
+                bug_count = filtered_df[filtered_df['label'] == 'bug'].shape[0]
+                st.metric("Bugs", bug_count)
+            with col3:
+                blocker_count = filtered_df[filtered_df['label'] == 'blocker'].shape[0]
+                st.metric("Blockers", blocker_count)
+        
+        # Configure grid options
+        gb = GridOptionsBuilder.from_dataframe(filtered_df[display_cols])
+        gb.configure_pagination()
+        gb.configure_default_column(editable=True, sortable=True, resizable=True)
+        gb.configure_selection('multiple', use_checkbox=True, pre_selected_rows=[])
+        
+        # Configure row selection with new API
+        grid_options = gb.build()
+        
+        # Simplified grid options for better compatibility
+        grid_options.update({
+            'domLayout': 'normal',
+            'rowHeight': 50,
+            'headerHeight': 60,
+            'theme': 'ag-theme-alpine',
+            'rowSelection': 'multiple',
+            'suppressRowClickSelection': False,
+            'rowMultiSelectWithClick': True
+        })
+        
+        # Convert object columns to strings to avoid serialization issues
+        display_df = filtered_df[display_cols].copy()
+        for col in display_cols:
+            if col in ['tagged_users', 'channel']:
+                display_df[col] = display_df[col].apply(lambda x: ', '.join(x) if isinstance(x, list) else str(x))
+        
+        # Format column headers to be more readable and standard
+        column_headers = {
+            'message': 'Message',
+            'label': 'Label',
+            'user': 'User',
+            'timestamp': 'Timestamp',
+            'tagged_users': 'Tagged Users',
+            'channel': 'Channel',
+            'Slack Link': 'Slack Link'
         }
-        st.sidebar.success(f'Preset "{preset_name}" saved!')
-    if st.sidebar.button('Load filter preset') and st.session_state['filter_presets']:
-        preset_to_load = st.sidebar.selectbox('Choose preset to load:', list(st.session_state['filter_presets'].keys()))
-        preset = st.session_state['filter_presets'][preset_to_load]
-        user_filter = preset['user_filter']
-        msg_filter = preset['msg_filter']
-        selected_cols = preset['columns']
-        st.rerun()
-    display_cols = selected_cols
-    if show_summary:
-        st.markdown("### 🧮 Summary")
-        for l in ["task", "bug", "blocker"]:
-            count = filtered_df[filtered_df['label'] == l].shape[0]
-            st.markdown(f"- **{l.capitalize()}s**: {count}")
-    gb = GridOptionsBuilder.from_dataframe(filtered_df[display_cols])
-    gb.configure_pagination()
-    gb.configure_default_column(editable=True, groupable=True)
-    gb.configure_selection('multiple', use_checkbox=True)
-    # Render Slack Link column as HTML
-    grid_response = AgGrid(filtered_df[display_cols], gridOptions=gb.build(), enable_enterprise_modules=False, return_mode='AS_INPUT', allow_unsafe_jscode=True, height=400, fit_columns_on_grid_load=True, reload_data=True, custom_css={".ag-cell": {"overflow": "visible"}}, enable_html=True)
-    selected_rows = grid_response.get('selected_rows')
-    if selected_rows is None:
-        selected_rows = []
-    selected_msgs = [
-        row['message'] if isinstance(row, dict) and 'message' in row else str(row)
-        for row in selected_rows
-    ]
-    # Multi-delete feature with confirmation
-    if selected_rows is not None and len(selected_rows) > 0:
-        st.warning(f"You have selected {len(selected_rows)} messages for deletion.")
-        confirm = st.checkbox("I confirm I want to delete the selected messages.", key="confirm_delete_selected")
-        if confirm:
-            if st.button("Delete Selected Messages"):
-                for row in selected_rows:
-                    if isinstance(row, dict) and 'message' in row:
-                        delete_message(message=row['message'])
-                st.success(f"Deleted {len(selected_rows)} messages.")
-                st.rerun()
-    if st.button('Summarize Selected Messages'):
-        summary = summarize_selected_messages(selected_msgs)
-        st.markdown('#### Summary:')
-        st.write(summary)
-    if st.button('Extract Action Items from Selected Messages'):
-        actions = extract_action_items(selected_msgs)
-        st.markdown('#### Action Items:')
-        st.write(actions)
-    # Remove feedback loop: allow user to correct label
-    # (Deleted code for label correction and feedback UI)
+        
+        # Rename columns for better display
+        display_df = display_df.rename(columns=column_headers)
+        
+        # Update grid options to match renamed columns
+        if 'columnDefs' in grid_options:
+            for col_def in grid_options['columnDefs']:
+                old_field = col_def.get('field', '')
+                if old_field in column_headers:
+                    new_field = column_headers[old_field]
+                    col_def['field'] = new_field
+                    col_def['headerName'] = new_field
+        
+        # Table section with better spacing
+        st.markdown("### 📋 Slack Messages")
+        st.markdown("*Use the controls in the sidebar to customize your view*")
+        
+        # Render Slack Link column as HTML
+        grid_response = AgGrid(
+            display_df, 
+            gridOptions=grid_options, 
+            enable_enterprise_modules=False, 
+            return_mode='AS_INPUT', 
+            allow_unsafe_jscode=True, 
+            height=500, 
+            fit_columns_on_grid_load=True, 
+            reload_data=True, 
+            enable_html=True,
+            custom_css={
+                ".ag-theme-alpine": {
+                    "background": "linear-gradient(135deg, #2A2438 0%, #352F44 100%)",
+                    "border": "2px solid #5C5470",
+                    "border-radius": "12px",
+                    "box-shadow": "0 8px 32px rgba(0, 0, 0, 0.3)",
+                    "font-family": "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
+                },
+                ".ag-theme-alpine .ag-header": {
+                    "background": "linear-gradient(135deg, #5C5470 0%, #352F44 100%)",
+                    "color": "#fff",
+                    "font-weight": "600",
+                    "text-transform": "uppercase"
+                },
+                ".ag-theme-alpine .ag-row": {
+                    "background": "linear-gradient(135deg, #2A2438 0%, #352F44 100%)",
+                    "color": "#DBD8E3"
+                },
+                ".ag-theme-alpine .ag-cell": {
+                    "color": "#DBD8E3",
+                    "font-family": "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
+                }
+            }
+        )
+        
+        selected_rows = grid_response.get('selected_rows')
+        if selected_rows is None:
+            selected_rows = []
+        
+        # Convert DataFrame to list of dictionaries if needed
+        if hasattr(selected_rows, 'to_dict'):
+            selected_rows = selected_rows.to_dict('records')
+        elif not isinstance(selected_rows, list):
+            selected_rows = []
+        
+        # Debug information
+        st.write(f"Debug: Selected rows count: {len(selected_rows)}")
+        if len(selected_rows) > 0:
+            st.write(f"Debug: First selected row keys: {list(selected_rows[0].keys()) if selected_rows else 'None'}")
+        
+        selected_msgs = [
+            row['Message'] if isinstance(row, dict) and 'Message' in row else str(row)
+            for row in selected_rows
+        ]
+        
+        # Action buttons in a better layout
+        if selected_rows is not None and len(selected_rows) > 0:
+            st.markdown("### ⚡ Actions for Selected Messages")
+            st.warning(f"You have selected {len(selected_rows)} messages.")
+            
+            col1, col2, col3 = st.columns(3)
+            with col1:
+                confirm = st.checkbox("I confirm I want to delete the selected messages.", key="confirm_delete_selected")
+            with col2:
+                if confirm and st.button("🗑️ Delete Selected Messages"):
+                    for row in selected_rows:
+                        if isinstance(row, dict) and 'Message' in row:
+                            delete_message(message=row['Message'])
+                    st.success(f"Deleted {len(selected_rows)} messages.")
+                    st.rerun()
+            with col3:
+                if st.button('📊 Summarize Selected Messages'):
+                    summary = summarize_selected_messages(selected_msgs)
+                    st.markdown('#### Summary:')
+                    st.write(summary)
+            
+            if st.button('📝 Extract Action Items from Selected Messages'):
+                actions = extract_action_items(selected_msgs)
+                st.markdown('#### Action Items:')
+                st.write(actions)
+        else:
+            st.info("💡 Select messages from the table above to perform actions.")
 
 # Semantic search bar and results
 if selected_tab not in ["AI Chat", "Expert Directory", "Decision Logs"]:
