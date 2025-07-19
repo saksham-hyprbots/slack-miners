@@ -66,8 +66,8 @@ def fetch_latest_messages(limit=100):
                     new_count += 1
         except SlackApiError as e:
             if e.response['error'] == 'ratelimited':
-                logging.warning(f"Slack API rate limited on channel {channel_id}. Backing off for 2 minutes.")
-                time.sleep(120)  # Sleep for 2 minutes if rate limited
+                logging.warning(f"Slack API rate limited on channel {channel_id}. Backing off for 20 minutes.")
+                time.sleep(1200)  # Sleep for 10 minutes if rate limited
             else:
                 print(f"Slack API Error in channel {channel_id}: {e.response['error']}" )
     return new_count

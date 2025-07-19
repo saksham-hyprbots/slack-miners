@@ -138,7 +138,7 @@ with st.sidebar:
             "All",
             "AI Chat",
             "Expert Directory",
-            "Decision logs"
+            "Decision Logs"
         ],
         icons=[
             "star-fill",  # Prioritized Tasks
@@ -305,6 +305,51 @@ if selected_tab == "Decision Logs":
     # Only consider important messages
     important_df = df[df['label'].isin(['task', 'bug', 'blocker'])]
 
+    # --- Search Feature for Decision Logs ---
+    st.subheader("🔍 Search Decision Logs")
+    search_query = st.text_input("Search for messages in decision logs:", placeholder="Enter keywords or phrases...")
+    
+    if search_query:
+        # Use semantic search to find relevant messages
+        index = VectorIndex()
+        index.build_index()
+        search_results = index.search(search_query, top_k=10)
+        
+        # Filter search results to only important messages
+        search_messages = [msg for msg, _ in search_results]
+        filtered_important_df = important_df[important_df['message'].isin(search_messages)]
+        
+        if not filtered_important_df.empty:
+            st.success(f"Found {len(filtered_important_df)} relevant decision log entries:")
+            st.markdown("---")
+            
+            # Display search results
+            for idx, row in filtered_important_df.iterrows():
+                msg_time = float(row['timestamp'])
+                user = row['user']
+                thread_ts = row.get('thread_ts', None)
+                # Find follow-ups: Prefer thread-based, else fallback to time/user-based
+                if thread_ts and thread_ts in df['thread_ts'].values:
+                    followups = df[(df['thread_ts'] == thread_ts) & (df['message'] != row['message'])]
+                else:
+                    followups = df[(df['user'] == user) & (df['timestamp'] > msg_time) & (df['timestamp'] <= msg_time + 86400) & (df['message'] != row['message'])]
+                followup_msgs = followups['message'].tolist()
+                # Show only stored summary if present
+                summary = row.get('summary', None)
+                if not summary:
+                    summary = "No summary stored. Please generate summaries."
+                
+                st.markdown(f"**User:** {user}  ")
+                st.markdown(f"**Time:** {datetime.datetime.fromtimestamp(msg_time).strftime('%Y-%m-%d %H:%M:%S')}  ")
+                st.markdown(f"**Original Message:** {row['message']}")
+                st.markdown(f"**Summary of Follow-ups:** {summary}")
+                st.markdown("---")
+        else:
+            st.info("No relevant decision log entries found for your search. Try different keywords.")
+    else:
+        # Show all decision logs when no search is performed
+        st.subheader("📋 All Decision Logs")
+
     # Button to generate and store summaries
     if st.button('Generate and Store Summaries for All Important Messages'):
         from mongo_store import update_summary
@@ -328,35 +373,38 @@ if selected_tab == "Decision Logs":
                 time.sleep(10)  # Add delay to avoid rate limits
         st.success('Summaries generated and stored for all important messages without a summary.')
         st.rerun()
-    logs = []
-    for idx, row in important_df.iterrows():
-        msg_time = float(row['timestamp'])
-        user = row['user']
-        thread_ts = row.get('thread_ts', None)
-        # Find follow-ups: Prefer thread-based, else fallback to time/user-based
-        if thread_ts and thread_ts in df['thread_ts'].values:
-            followups = df[(df['thread_ts'] == thread_ts) & (df['message'] != row['message'])]
-        else:
-            followups = df[(df['user'] == user) & (df['timestamp'] > msg_time) & (df['timestamp'] <= msg_time + 86400) & (df['message'] != row['message'])]
-        followup_msgs = followups['message'].tolist()
-        # Show only stored summary if present
-        summary = row.get('summary', None)
-        if not summary:
-            summary = "No summary stored. Please generate summaries."
-        logs.append({
-            'original': row['message'],
-            'followups': followup_msgs,
-            'summary': summary,
-            'user': user,
-            'timestamp': datetime.datetime.fromtimestamp(msg_time).strftime('%Y-%m-%d %H:%M:%S')
-        })
-    # Display logs
-    for log in logs:
-        st.markdown(f"**User:** {log['user']}  ")
-        st.markdown(f"**Time:** {log['timestamp']}  ")
-        st.markdown(f"**Original Message:** {log['original']}")
-        st.markdown(f"**Summary of Follow-ups:** {log['summary']}")
-        st.markdown("---")
+    
+    # Only show all logs if no search is being performed
+    if not search_query:
+        logs = []
+        for idx, row in important_df.iterrows():
+            msg_time = float(row['timestamp'])
+            user = row['user']
+            thread_ts = row.get('thread_ts', None)
+            # Find follow-ups: Prefer thread-based, else fallback to time/user-based
+            if thread_ts and thread_ts in df['thread_ts'].values:
+                followups = df[(df['thread_ts'] == thread_ts) & (df['message'] != row['message'])]
+            else:
+                followups = df[(df['user'] == user) & (df['timestamp'] > msg_time) & (df['timestamp'] <= msg_time + 86400) & (df['message'] != row['message'])]
+            followup_msgs = followups['message'].tolist()
+            # Show only stored summary if present
+            summary = row.get('summary', None)
+            if not summary:
+                summary = "No summary stored. Please generate summaries."
+            logs.append({
+                'original': row['message'],
+                'followups': followup_msgs,
+                'summary': summary,
+                'user': user,
+                'timestamp': datetime.datetime.fromtimestamp(msg_time).strftime('%Y-%m-%d %H:%M:%S')
+            })
+        # Display logs
+        for log in logs:
+            st.markdown(f"**User:** {log['user']}  ")
+            st.markdown(f"**Time:** {log['timestamp']}  ")
+            st.markdown(f"**Original Message:** {log['original']}")
+            st.markdown(f"**Summary of Follow-ups:** {log['summary']}")
+            st.markdown("---")
 
 # --- Theme toggle ---
 # theme_choice = st.sidebar.selectbox('Theme', ['light', 'dark'], index=0)
