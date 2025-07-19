@@ -23,7 +23,7 @@ jsonschema==4.24.0
 jsonschema-specifications==2025.4.1
 MarkupSafe==3.0.2
 narwhals==1.47.0
-numpy==2.3.1
+numpy==2.2.0
 pyarrow==20.0.0
 pydantic==2.11.7
 pydantic_core==2.33.2
