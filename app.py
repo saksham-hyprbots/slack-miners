@@ -756,23 +756,7 @@ fetcher_thread.start()
 def render_dashboard(filtered_df, show_summary=True):
     # Create a container for better organization
     with st.container():
-        # Header section with better spacing
-        st.markdown("---")
-        
-        # Search filters in a nice layout
-        col1, col2 = st.columns(2)
-        with col1:
-            user_filter = st.text_input("🔍 Search by user", placeholder="Enter user name or initials...")
-        with col2:
-            msg_filter = st.text_input("🔍 Search by message", placeholder="Enter keywords...")
-        
-        # Apply filters
-        if user_filter:
-            filtered_df = fuzzy_filter(filtered_df, 'user', user_filter)
-        if msg_filter:
-            filtered_df = fuzzy_filter(filtered_df, 'message', msg_filter)
-        
-        # Process data
+        # Process data first
         filtered_df['timestamp'] = filtered_df['timestamp'].apply(
             lambda x: datetime.datetime.fromtimestamp(float(x)).strftime('%Y-%m-%d %H:%M:%S') if x else ''
         )
@@ -841,19 +825,53 @@ def render_dashboard(filtered_df, show_summary=True):
             selected_cols = all_cols
         display_cols = selected_cols
         
-        # Summary section with better styling
+        # Main content area with better spacing and organization
+        st.markdown("---")
+        
+        # Search filters in a modern card layout
+        with st.container():
+            st.markdown("### 🔍 Search & Filter")
+            search_col1, search_col2, search_col3 = st.columns([2, 2, 1])
+            with search_col1:
+                user_filter = st.text_input("👤 Search by user", placeholder="Enter user name or initials...", key="user_search")
+            with search_col2:
+                msg_filter = st.text_input("💬 Search by message", placeholder="Enter keywords...", key="msg_search")
+            with search_col3:
+                st.markdown("")
+                st.markdown("")
+                if st.button("🔄 Clear Filters", key="clear_filters"):
+                    # Clear session state variables
+                    if 'user_search' in st.session_state:
+                        del st.session_state['user_search']
+                    if 'msg_search' in st.session_state:
+                        del st.session_state['msg_search']
+                    st.rerun()
+        
+        # Apply filters
+        if user_filter:
+            filtered_df = fuzzy_filter(filtered_df, 'user', user_filter)
+        if msg_filter:
+            filtered_df = fuzzy_filter(filtered_df, 'message', msg_filter)
+        
+        # Summary section with better styling and spacing
         if show_summary:
-            st.markdown("### 📈 Summary Statistics")
-            col1, col2, col3 = st.columns(3)
-            with col1:
+            st.markdown("")
+            st.markdown("### 📊 Summary Statistics")
+            summary_col1, summary_col2, summary_col3, summary_col4 = st.columns(4)
+            with summary_col1:
                 task_count = filtered_df[filtered_df['label'] == 'task'].shape[0]
-                st.metric("Tasks", task_count)
-            with col2:
+                st.metric("📋 Tasks", task_count, delta=None)
+            with summary_col2:
                 bug_count = filtered_df[filtered_df['label'] == 'bug'].shape[0]
-                st.metric("Bugs", bug_count)
-            with col3:
+                st.metric("🐛 Bugs", bug_count, delta=None)
+            with summary_col3:
                 blocker_count = filtered_df[filtered_df['label'] == 'blocker'].shape[0]
-                st.metric("Blockers", blocker_count)
+                st.metric("🚫 Blockers", blocker_count, delta=None)
+            with summary_col4:
+                total_count = filtered_df.shape[0]
+                st.metric("📈 Total Messages", total_count, delta=None)
+        
+        st.markdown("")
         
         # Configure grid options
         gb = GridOptionsBuilder.from_dataframe(filtered_df[display_cols])
@@ -904,9 +922,10 @@ def render_dashboard(filtered_df, show_summary=True):
                     col_def['field'] = new_field
                     col_def['headerName'] = new_field
         
-        # Table section with better spacing
+        # Table section with better spacing and modern header
         st.markdown("### 📋 Slack Messages")
-        st.markdown("*Use the controls in the sidebar to customize your view*")
+        st.markdown("*Select messages from the table below to perform actions*")
+        st.markdown("")
         
         # Render Slack Link column as HTML
         grid_response = AgGrid(
@@ -915,7 +934,7 @@ def render_dashboard(filtered_df, show_summary=True):
             enable_enterprise_modules=False, 
             return_mode='AS_INPUT', 
             allow_unsafe_jscode=True, 
-            height=500, 
+            height=600, 
             fit_columns_on_grid_load=True, 
             reload_data=True, 
             enable_html=True,
