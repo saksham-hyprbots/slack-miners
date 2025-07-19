@@ -158,10 +158,26 @@ st.markdown(
     .ag-theme-alpine {
         background: linear-gradient(135deg, #2A2438 0%, #352F44 100%) !important;
         border: 2px solid #5C5470 !important;
-        border-radius: 12px !important;
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3) !important;
+        border-radius: 20px !important;
+        box-shadow: 
+            0 8px 32px rgba(0, 0, 0, 0.15),
+            0 4px 16px rgba(0, 0, 0, 0.08) !important;
         font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
         overflow: hidden !important;
+        position: relative !important;
+    }
+    
+    /* Rounded corners for the entire table */
+    .ag-theme-alpine::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        border-radius: 20px;
+        pointer-events: none;
+        z-index: 1;
     }
     
     /* Force all AgGrid elements to use our theme */
@@ -182,6 +198,15 @@ st.markdown(
         text-transform: uppercase !important;
         letter-spacing: 0.5px !important;
         min-height: 60px !important;
+        border-radius: 20px 20px 0 0 !important;
+    }
+    
+    .ag-theme-alpine .ag-header-cell:first-child {
+        border-top-left-radius: 20px !important;
+    }
+    
+    .ag-theme-alpine .ag-header-cell:last-child {
+        border-top-right-radius: 20px !important;
     }
     
     .ag-theme-alpine .ag-header-cell {
@@ -210,6 +235,19 @@ st.markdown(
         font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
         font-size: 14px !important;
         line-height: 1.6 !important;
+    }
+    
+    .ag-theme-alpine .ag-row:last-child {
+        border-bottom-left-radius: 20px !important;
+        border-bottom-right-radius: 20px !important;
+    }
+    
+    .ag-theme-alpine .ag-row:last-child .ag-cell:first-child {
+        border-bottom-left-radius: 20px !important;
+    }
+    
+    .ag-theme-alpine .ag-row:last-child .ag-cell:last-child {
+        border-bottom-right-radius: 20px !important;
     }
     
     .ag-theme-alpine .ag-row:hover {
@@ -843,7 +881,8 @@ def render_dashboard(filtered_df, show_summary=True):
         
         # Search filters in a modern card layout
         with st.container():
-            st.markdown("### 🔍 Search & Filter")
+            st.markdown('<div class="modern-card">', unsafe_allow_html=True)
+            st.markdown('<h3 class="modern-heading">🔍 Search & Filter</h3>', unsafe_allow_html=True)
             search_col1, search_col2, search_col3 = st.columns([2, 2, 1])
             with search_col1:
                 user_filter = st.text_input("👤 Search by user", placeholder="Enter user name or initials...", key="user_search")
@@ -859,6 +898,7 @@ def render_dashboard(filtered_df, show_summary=True):
                     if 'msg_search' in st.session_state:
                         del st.session_state['msg_search']
                     st.rerun()
+            st.markdown('</div>', unsafe_allow_html=True)
         
         # Apply filters
         if user_filter:
@@ -869,20 +909,22 @@ def render_dashboard(filtered_df, show_summary=True):
         # Summary section with better styling and spacing
         if show_summary:
             st.markdown("")
-            st.markdown("### 📊 Summary Statistics")
+            st.markdown('<div class="modern-card">', unsafe_allow_html=True)
+            st.markdown('<h3 class="modern-heading">📊 Summary Statistics</h3>', unsafe_allow_html=True)
             summary_col1, summary_col2, summary_col3, summary_col4 = st.columns(4)
             with summary_col1:
                 task_count = filtered_df[filtered_df['label'] == 'task'].shape[0]
-                st.metric("📋 Tasks", task_count, delta=None)
+                st.markdown(f'<div class="metric-container"><h4 class="modern-caption">📋 Tasks</h4><p class="modern-title">{task_count}</p></div>', unsafe_allow_html=True)
             with summary_col2:
                 bug_count = filtered_df[filtered_df['label'] == 'bug'].shape[0]
-                st.metric("🐛 Bugs", bug_count, delta=None)
+                st.markdown(f'<div class="metric-container"><h4 class="modern-caption">🐛 Bugs</h4><p class="modern-title">{bug_count}</p></div>', unsafe_allow_html=True)
             with summary_col3:
                 blocker_count = filtered_df[filtered_df['label'] == 'blocker'].shape[0]
-                st.metric("🚫 Blockers", blocker_count, delta=None)
+                st.markdown(f'<div class="metric-container"><h4 class="modern-caption">🚫 Blockers</h4><p class="modern-title">{blocker_count}</p></div>', unsafe_allow_html=True)
             with summary_col4:
                 total_count = filtered_df.shape[0]
-                st.metric("📈 Total Messages", total_count, delta=None)
+                st.markdown(f'<div class="metric-container"><h4 class="modern-caption">📈 Total Messages</h4><p class="modern-title">{total_count}</p></div>', unsafe_allow_html=True)
+            st.markdown('</div>', unsafe_allow_html=True)
         
         st.markdown("")
         
@@ -940,8 +982,9 @@ def render_dashboard(filtered_df, show_summary=True):
                     col_def['headerName'] = new_field
         
         # Table section with better spacing and modern header
-        st.markdown("### 📋 Slack Messages")
-        st.markdown("*Select messages from the table below to perform actions*")
+        st.markdown('<div class="modern-card">', unsafe_allow_html=True)
+        st.markdown('<h3 class="modern-heading">📋 Slack Messages</h3>', unsafe_allow_html=True)
+        st.markdown('<p class="modern-caption">Select messages from the table below to perform actions</p>', unsafe_allow_html=True)
         st.markdown("")
         
         # Render Slack Link column as HTML
@@ -999,35 +1042,47 @@ def render_dashboard(filtered_df, show_summary=True):
         
         # Action buttons in a better layout
         if selected_rows is not None and len(selected_rows) > 0:
-            st.markdown("### ⚡ Actions for Selected Messages")
-            st.warning(f"You have selected {len(selected_rows)} messages.")
+            st.markdown('<div class="modern-card">', unsafe_allow_html=True)
+            st.markdown('<h3 class="modern-heading">⚡ Actions for Selected Messages</h3>', unsafe_allow_html=True)
+            st.markdown(f'<p class="modern-body">You have selected {len(selected_rows)} messages.</p>', unsafe_allow_html=True)
             
-            col1, col2, col3 = st.columns(3)
-            with col1:
-                confirm = st.checkbox("I confirm I want to delete the selected messages.", key="confirm_delete_selected")
-            with col2:
-                if confirm and st.button("🗑️ Delete Selected Messages"):
-                    for row in selected_rows:
-                        if isinstance(row, dict) and 'Message' in row:
-                            delete_message(message=row['Message'])
-                    st.success(f"Deleted {len(selected_rows)} messages.")
-                    st.rerun()
-            with col3:
-                if st.button('📊 Summarize Selected Messages'):
+            # Delete section
+            st.markdown('<h4 class="modern-heading">🗑️ Delete Messages</h4>', unsafe_allow_html=True)
+            confirm = st.checkbox("I confirm I want to delete the selected messages.", key="confirm_delete_selected")
+            if confirm and st.button("🗑️ Delete Selected Messages", key="delete_btn"):
+                for row in selected_rows:
+                    if isinstance(row, dict) and 'Message' in row:
+                        delete_message(message=row['Message'])
+                st.success(f"Deleted {len(selected_rows)} messages.")
+                st.rerun()
+            
+            st.markdown("")  # Add spacing
+            
+            # Analysis section
+            st.markdown('<h4 class="modern-heading">📊 Analyze Messages</h4>', unsafe_allow_html=True)
+            analysis_col1, analysis_col2 = st.columns(2)
+            
+            with analysis_col1:
+                if st.button('📊 Summarize Selected Messages', key="summarize_btn"):
                     summary = summarize_selected_messages(selected_msgs)
-                    st.markdown('#### Summary:')
-                    st.write(summary)
+                    st.markdown('<h5 class="modern-heading">Summary:</h5>', unsafe_allow_html=True)
+                    st.markdown(f'<p class="modern-body">{summary}</p>', unsafe_allow_html=True)
             
-            if st.button('📝 Extract Action Items from Selected Messages'):
-                actions = extract_action_items(selected_msgs)
-                st.markdown('#### Action Items:')
-                st.write(actions)
+            with analysis_col2:
+                if st.button('📝 Extract Action Items from Selected Messages', key="extract_btn"):
+                    actions = extract_action_items(selected_msgs)
+                    st.markdown('<h5 class="modern-heading">Action Items:</h5>', unsafe_allow_html=True)
+                    st.markdown(f'<p class="modern-body">{actions}</p>', unsafe_allow_html=True)
+            
+            st.markdown('</div>', unsafe_allow_html=True)
         else:
-            st.info("💡 Select messages from the table above to perform actions.")
+            st.markdown('<div class="modern-card">', unsafe_allow_html=True)
+            st.markdown('<p class="modern-body">💡 Select messages from the table above to perform actions.</p>', unsafe_allow_html=True)
+            st.markdown('</div>', unsafe_allow_html=True)
 
 # Semantic search bar and results
 if selected_tab not in ["AI Chat", "Expert Directory", "Decision Logs"]:
-    st.title(f"📋 {selected_tab}")
+    st.markdown(f'<h1 class="modern-title">📋 {selected_tab}</h1>', unsafe_allow_html=True)
     
     # Cache the data loading
     if 'cached_data' not in st.session_state:
@@ -1038,7 +1093,10 @@ if selected_tab not in ["AI Chat", "Expert Directory", "Decision Logs"]:
     if df.empty or 'label' not in df.columns:
         st.warning("No Slack messages found or data is not yet indexed. Please load messages from Slack.")
         st.stop()
-    semantic_query = st.text_input("Semantic search (AI-powered, finds similar messages by meaning)")
+    st.markdown('<div class="modern-card">', unsafe_allow_html=True)
+    st.markdown('<h3 class="modern-heading">🔍 Semantic Search</h3>', unsafe_allow_html=True)
+    st.markdown('<p class="modern-caption">AI-powered search that finds similar messages by meaning</p>', unsafe_allow_html=True)
+    semantic_query = st.text_input("Enter your search query...", key="semantic_search")
     semantic_results = None
     if semantic_query:
         index = VectorIndex()
@@ -1047,8 +1105,9 @@ if selected_tab not in ["AI Chat", "Expert Directory", "Decision Logs"]:
         semantic_results = pd.DataFrame([
             {"message": msg, "score": score} for msg, score in results
         ])
-        st.markdown("#### Top 10 Semantic Matches:")
+        st.markdown('<h4 class="modern-heading">Top 10 Semantic Matches:</h4>', unsafe_allow_html=True)
         st.dataframe(semantic_results)
+    st.markdown('</div>', unsafe_allow_html=True)
     if selected_tab == "Prioritized Tasks":
         filtered_df = df[df['label'] == 'task']
         render_dashboard(filtered_df, show_summary=False)
