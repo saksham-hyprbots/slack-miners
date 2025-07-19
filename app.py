@@ -954,10 +954,7 @@ def render_dashboard(filtered_df, show_summary=True):
         elif not isinstance(selected_rows, list):
             selected_rows = []
         
-        # Debug information
-        st.write(f"Debug: Selected rows count: {len(selected_rows)}")
-        if len(selected_rows) > 0:
-            st.write(f"Debug: First selected row keys: {list(selected_rows[0].keys()) if selected_rows else 'None'}")
+
         
         selected_msgs = [
             row['Message'] if isinstance(row, dict) and 'Message' in row else str(row)
