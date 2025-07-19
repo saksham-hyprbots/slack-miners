@@ -54,4 +54,5 @@ torch
 rapidfuzz
 streamlit-aggrid
 streamlit-authenticator
+streamlit-option-menu==0.4.0
 PyYAML
