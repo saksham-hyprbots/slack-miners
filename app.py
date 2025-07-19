@@ -24,12 +24,116 @@ load_dotenv('a.env')
 
 logging.basicConfig(level=logging.INFO)
 
-# Remove authentication logic
-# name, authentication_status, username = authenticate_user()
-# st.write(name, authentication_status, username)
+# Simple login/signup form on main page (no modal)
+import streamlit as st
 
-# st.title("Slack RAG Assistant (No Authentication)")
-# st.write("Authentication has been removed. The app is now open to all users.")
+# User credentials (for demo)
+users = {
+    "admin": {"name": "Admin User", "password": "Hyper@123"},
+    "manager": {"name": "Manager User", "password": "Hyper@123"}
+}
+
+if "authenticated" not in st.session_state:
+    st.session_state["authenticated"] = False
+if "username" not in st.session_state:
+    st.session_state["username"] = ""
+
+if not st.session_state["authenticated"]:
+    st.markdown("""
+    <style>
+    .login-bg-glow {
+        position: absolute;
+        left: 50%; top: 0;
+        transform: translateX(-50%);
+        width: 480px; height: 480px;
+        z-index: 0;
+        filter: blur(60px);
+        background: radial-gradient(circle at 50% 30%, #667eea 0%, #764ba2 60%, #10B981 100%);
+        opacity: 0.25;
+        animation: glowmove 6s ease-in-out infinite alternate;
+    }
+    @keyframes glowmove {
+        0% { filter: blur(60px) brightness(1); }
+        100% { filter: blur(80px) brightness(1.2); }
+    }
+    @keyframes borderGradient {
+        0% { border-image-source: linear-gradient(135deg, #667eea, #764ba2, #10B981, #667eea); }
+        100% { border-image-source: linear-gradient(315deg, #764ba2, #10B981, #667eea, #764ba2); }
+    }
+    div[data-testid="stVerticalBlock"] > div.cool-login-container {
+        border: 4px solid;
+        border-image: linear-gradient(135deg, #667eea 0%, #764ba2 40%, #10B981 100%);
+        border-image-slice: 1;
+        border-radius: 28px;
+        padding: 2.5rem 2.5rem 2rem 2.5rem;
+        max-width: 420px;
+        width: 100%;
+        margin: 3.5rem auto 0 auto;
+        text-align: center;
+        background: rgba(40, 44, 52, 0.82);
+        box-shadow: 0 16px 48px 0 rgba(102, 126, 234, 0.25), 0 2px 12px 0 rgba(16, 185, 129, 0.10);
+        backdrop-filter: blur(22px);
+        transition: box-shadow 0.3s, border 0.3s;
+        animation: borderGradient 5s linear infinite alternate;
+        position: relative;
+        z-index: 1;
+    }
+    div[data-testid="stVerticalBlock"] > div.cool-login-container:hover {
+        box-shadow: 0 24px 64px 0 rgba(102, 126, 234, 0.35), 0 4px 16px 0 rgba(16, 185, 129, 0.15);
+        border-width: 5px;
+    }
+    .login-btn-modern {
+        width: 100%;
+        margin-top: 1.5rem;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: #fff;
+        font-size: 1.1rem;
+        font-weight: 700;
+        border: none;
+        border-radius: 10px;
+        padding: 0.9em 0;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.13);
+        transition: background 0.2s, box-shadow 0.2s;
+        cursor: pointer;
+    }
+    .login-btn-modern:hover {
+        background: linear-gradient(135deg, #10B981 0%, #667eea 100%);
+        box-shadow: 0 8px 24px rgba(16, 185, 129, 0.18);
+    }
+    </style>
+    <div class='login-bg-glow'></div>
+    """, unsafe_allow_html=True)
+    with st.container():
+        st.markdown('<div class="cool-login-container">', unsafe_allow_html=True)
+        # st.image("logo.png", width=72)  # Uncomment if you have a logo
+        st.markdown('<div style="font-size:2.3rem;font-weight:900;color:#667eea;letter-spacing:-1px;margin-bottom:0.5rem;">HyperSlack</div>', unsafe_allow_html=True)
+        st.markdown('<div style="color:#a3aed6;font-size:1.1rem;margin-bottom:2.2rem;font-weight:500;">AI-powered Slack Knowledge Management</div>', unsafe_allow_html=True)
+        mode = st.radio("", ["Login", "Sign Up"], horizontal=True)
+        username = st.text_input("Username")
+        password = st.text_input("Password", type="password")
+        if st.button(mode, key="real_btn"):
+            if mode == "Login":
+                if username in users and password == users[username]["password"]:
+                    st.session_state["authenticated"] = True
+                    st.session_state["username"] = username
+                    st.success("Login successful!")
+                    st.rerun()
+                else:
+                    st.error("Invalid username or password")
+            elif mode == "Sign Up":
+                if username in users:
+                    st.error("Username already exists")
+                elif not username or not password:
+                    st.error("Please enter a username and password")
+                else:
+                    users[username] = {"name": username, "password": password}
+                    st.success("User created! Please log in.")
+        st.markdown('</div>', unsafe_allow_html=True)
+    st.stop()
+
+# Show logged-in user in sidebar
+with st.sidebar:
+    st.markdown(f"**Logged in as:** {st.session_state['username'].capitalize()}")
 
 
 # --- Custom CSS for better button design ---
@@ -1176,3 +1280,13 @@ if selected_tab not in ["AI Chat", "Expert Directory", "Decision Logs"]:
     else:  # All
         filtered_df = df
         render_dashboard(filtered_df, show_summary=True)
+
+# Move the Logout button to the end of the sidebar, after all other sidebar content
+# Remove the previous placement of the Logout button
+# At the very end of the sidebar, add:
+with st.sidebar:
+    st.markdown('---')
+    if st.button("Logout"):
+        st.session_state["authenticated"] = False
+        st.session_state["username"] = ""
+        st.rerun()
