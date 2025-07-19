@@ -63,7 +63,7 @@ st.markdown(
     }
     .stTextInput > div > div > input:focus {
         border-color: #DBD8E3;
-        box-shadow: 0 0 0 2px rgba(219, 216, 227, 0.2);
+        # box-shadow: 0 0 0 2px rgba(219, 216, 227, 0.2);
         outline: none;
     }
     .stTextInput > div > div > input::placeholder {
@@ -364,6 +364,43 @@ st.markdown(
     .ag-theme-alpine .ag-body-viewport-wrapper {
         background: linear-gradient(135deg, #2A2438 0%, #352F44 100%) !important;
     }
+
+    .metric-container {
+        background: linear-gradient(135deg, rgba(173, 216, 230, 0.25), rgba(221, 160, 221, 0.15)); /* LightBlue + Plum crystal tones */
+        border-radius: 18px;
+        box-shadow: 0 4px 24px rgba(0,0,0,0.12);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border: 1.5px solid rgba(255, 255, 255, 0.18);
+        padding: 24px 18px;
+        margin-bottom: 12px;
+        transition: box-shadow 0.2s ease;
+        text-align: center;
+        min-width: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .metric-container:hover {
+        box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+    }
+    .modern-caption {
+        font-size: 1.4rem !important;
+        font-weight: 600;
+        color: #DBD8E3;
+        margin-bottom: 0.5rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .modern-title {
+        font-size: 2.1rem !important;
+        font-weight: 700;
+        color: #fff;
+        margin: 0;
+    }
     </style>
     """,
     unsafe_allow_html=True
@@ -430,6 +467,21 @@ st.markdown(
     unsafe_allow_html=True
 )
 
+st.markdown(
+    """
+    <style>
+    h1, h2, h3, h4, h5, h6 {
+        margin-top: 0 !important;
+        padding-top: 0 !important;
+    }
+    .block-container {
+        padding-top: 0rem !important;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
+
 # --- Modern Sidebar Navigation ---
 with st.sidebar:
     col1, col2 = st.columns([1, 3])  # Adjust the ratio as needed
@@ -445,23 +497,24 @@ with st.sidebar:
     selected_tab = option_menu(
         menu_title=None,
         options=[
-            "Prioritized Tasks",
-            "Bugs",
-            "Blockers",
-            "Important",
-            "All",
+            "Dashboard",
             "AI Chat",
+            "Blockers",
+            "Bugs",
+            "Decision Logs",
             "Expert Directory",
-            "Decision Logs"
+            "Important",
+            "Prioritized Tasks",
         ],
         icons=[
-            "star-fill",  # Prioritized Tasks
-            "bug-fill",   # Bugs
-            "exclamation-triangle-fill",  # Blockers
-            "bookmark-fill",  # Important
-            "list-task",  # All
+            "list-task",  # Dashboard
             "chat-dots-fill",  # AI Chat
-            "person-lines-fill"  # Expert Directory
+            "exclamation-triangle-fill",  # Blockers
+            "bug-fill",   # Bugs
+            "journal-text",       # Decision Logs
+            "person-lines-fill",  # Expert Directory
+            "bookmark-fill",  # Important
+            "star-fill",  # Prioritized Tasks
         ],
         menu_icon="cast",
         default_index=0,
