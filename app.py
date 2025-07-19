@@ -733,8 +733,13 @@ def extract_channel_id(message):
 def fuzzy_filter(df, col, query):
     if not query:
         return df
-    choices = df[col].astype(str).tolist()
-    matches = process.extract(query, choices, scorer=fuzz.partial_ratio, limit=len(choices))
+    # Cache the string conversion
+    if f'{col}_str' not in st.session_state:
+        st.session_state[f'{col}_str'] = df[col].astype(str)
+    
+    # Use cached string column
+    choices = st.session_state[f'{col}_str'].tolist()
+    matches = process.extract(query, choices, scorer=fuzz.partial_ratio, limit=min(100, len(choices)))
     # Fix: process.extract returns (choice, score, index) tuples
     matched_values = set([choice for choice, score, index in matches if score > 60])
     return df[df[col].astype(str).isin(matched_values)]
@@ -756,28 +761,20 @@ fetcher_thread.start()
 def render_dashboard(filtered_df, show_summary=True):
     # Create a container for better organization
     with st.container():
-        # Header section with better spacing
-        st.markdown("---")
+        # Process data first - Cache expensive operations
+        if 'processed_timestamp' not in st.session_state:
+            st.session_state['processed_timestamp'] = filtered_df['timestamp'].apply(
+                lambda x: datetime.datetime.fromtimestamp(float(x)).strftime('%Y-%m-%d %H:%M:%S') if x else ''
+            )
+        filtered_df['timestamp'] = st.session_state['processed_timestamp']
         
-        # Search filters in a nice layout
-        col1, col2 = st.columns(2)
-        with col1:
-            user_filter = st.text_input("🔍 Search by user", placeholder="Enter user name or initials...")
-        with col2:
-            msg_filter = st.text_input("🔍 Search by message", placeholder="Enter keywords...")
+        if 'processed_tagged_users' not in st.session_state:
+            st.session_state['processed_tagged_users'] = filtered_df['message'].apply(extract_tagged_users)
+        filtered_df['tagged_users'] = st.session_state['processed_tagged_users']
         
-        # Apply filters
-        if user_filter:
-            filtered_df = fuzzy_filter(filtered_df, 'user', user_filter)
-        if msg_filter:
-            filtered_df = fuzzy_filter(filtered_df, 'message', msg_filter)
-        
-        # Process data
-        filtered_df['timestamp'] = filtered_df['timestamp'].apply(
-            lambda x: datetime.datetime.fromtimestamp(float(x)).strftime('%Y-%m-%d %H:%M:%S') if x else ''
-        )
-        filtered_df['tagged_users'] = filtered_df['message'].apply(extract_tagged_users)
-        filtered_df['channel'] = filtered_df['message'].apply(extract_channel_id)
+        if 'processed_channel' not in st.session_state:
+            st.session_state['processed_channel'] = filtered_df['message'].apply(extract_channel_id)
+        filtered_df['channel'] = st.session_state['processed_channel']
 
         # --- Add Slack Link column ---
         TEAM_ID = os.getenv('SLACK_TEAM_ID', 'T096DH6RKHN')  # Set your real team ID in .env
@@ -841,19 +838,53 @@ def render_dashboard(filtered_df, show_summary=True):
             selected_cols = all_cols
         display_cols = selected_cols
         
-        # Summary section with better styling
+        # Main content area with better spacing and organization
+        st.markdown("---")
+        
+        # Search filters in a modern card layout
+        with st.container():
+            st.markdown("### 🔍 Search & Filter")
+            search_col1, search_col2, search_col3 = st.columns([2, 2, 1])
+            with search_col1:
+                user_filter = st.text_input("👤 Search by user", placeholder="Enter user name or initials...", key="user_search")
+            with search_col2:
+                msg_filter = st.text_input("💬 Search by message", placeholder="Enter keywords...", key="msg_search")
+            with search_col3:
+                st.markdown("")
+                st.markdown("")
+                if st.button("🔄 Clear Filters", key="clear_filters"):
+                    # Clear session state variables
+                    if 'user_search' in st.session_state:
+                        del st.session_state['user_search']
+                    if 'msg_search' in st.session_state:
+                        del st.session_state['msg_search']
+                    st.rerun()
+        
+        # Apply filters
+        if user_filter:
+            filtered_df = fuzzy_filter(filtered_df, 'user', user_filter)
+        if msg_filter:
+            filtered_df = fuzzy_filter(filtered_df, 'message', msg_filter)
+        
+        # Summary section with better styling and spacing
         if show_summary:
-            st.markdown("### 📈 Summary Statistics")
-            col1, col2, col3 = st.columns(3)
-            with col1:
+            st.markdown("")
+            st.markdown("### 📊 Summary Statistics")
+            summary_col1, summary_col2, summary_col3, summary_col4 = st.columns(4)
+            with summary_col1:
                 task_count = filtered_df[filtered_df['label'] == 'task'].shape[0]
-                st.metric("Tasks", task_count)
-            with col2:
+                st.metric("📋 Tasks", task_count, delta=None)
+            with summary_col2:
                 bug_count = filtered_df[filtered_df['label'] == 'bug'].shape[0]
-                st.metric("Bugs", bug_count)
-            with col3:
+                st.metric("🐛 Bugs", bug_count, delta=None)
+            with summary_col3:
                 blocker_count = filtered_df[filtered_df['label'] == 'blocker'].shape[0]
-                st.metric("Blockers", blocker_count)
+                st.metric("🚫 Blockers", blocker_count, delta=None)
+            with summary_col4:
+                total_count = filtered_df.shape[0]
+                st.metric("📈 Total Messages", total_count, delta=None)
+        
+        st.markdown("")
         
         # Configure grid options
         gb = GridOptionsBuilder.from_dataframe(filtered_df[display_cols])
@@ -879,7 +910,11 @@ def render_dashboard(filtered_df, show_summary=True):
         display_df = filtered_df[display_cols].copy()
         for col in display_cols:
             if col in ['tagged_users', 'channel']:
-                display_df[col] = display_df[col].apply(lambda x: ', '.join(x) if isinstance(x, list) else str(x))
+                # Cache the conversion
+                cache_key = f'display_{col}_{hash(str(filtered_df[col].tolist()))}'
+                if cache_key not in st.session_state:
+                    st.session_state[cache_key] = display_df[col].apply(lambda x: ', '.join(x) if isinstance(x, list) else str(x))
+                display_df[col] = st.session_state[cache_key]
         
         # Format column headers to be more readable and standard
         column_headers = {
@@ -904,9 +939,10 @@ def render_dashboard(filtered_df, show_summary=True):
                     col_def['field'] = new_field
                     col_def['headerName'] = new_field
         
-        # Table section with better spacing
+        # Table section with better spacing and modern header
         st.markdown("### 📋 Slack Messages")
-        st.markdown("*Use the controls in the sidebar to customize your view*")
+        st.markdown("*Select messages from the table below to perform actions*")
+        st.markdown("")
         
         # Render Slack Link column as HTML
         grid_response = AgGrid(
@@ -915,7 +951,7 @@ def render_dashboard(filtered_df, show_summary=True):
             enable_enterprise_modules=False, 
             return_mode='AS_INPUT', 
             allow_unsafe_jscode=True, 
-            height=500, 
+            height=600, 
             fit_columns_on_grid_load=True, 
             reload_data=True, 
             enable_html=True,
@@ -992,8 +1028,13 @@ def render_dashboard(filtered_df, show_summary=True):
 # Semantic search bar and results
 if selected_tab not in ["AI Chat", "Expert Directory", "Decision Logs"]:
     st.title(f"📋 {selected_tab}")
-    data = get_all_embeddings()
-    df = pd.DataFrame(data)
+    
+    # Cache the data loading
+    if 'cached_data' not in st.session_state:
+        data = get_all_embeddings()
+        st.session_state['cached_data'] = pd.DataFrame(data)
+    
+    df = st.session_state['cached_data']
     if df.empty or 'label' not in df.columns:
         st.warning("No Slack messages found or data is not yet indexed. Please load messages from Slack.")
         st.stop()
